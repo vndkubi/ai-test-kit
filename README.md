@@ -42,6 +42,8 @@ Monthly  Re-run the scan in CI, diff the output → new flows/entities surface a
 
 The goal is NOT coverage % — it is **the number of flows with doc + tests**.
 
+Step-by-step walkthrough with review checklists and failure modes: see **[GUIDE.md](GUIDE.md)**.
+
 ## Copilot ↔ Claude Code mapping
 
 | Role | Copilot | Claude Code |
