@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: test-writer
 description: "Build fixtures from FIXTURE_BACKLOG.md per conventions (Builder + Mother + Scenarios)"
 ---
 

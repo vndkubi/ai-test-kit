@@ -17,12 +17,14 @@
 ## Test discipline
 - A red test is VALUABLE OUTPUT (wrong analysis or a real bug) — report it. NEVER touch `src/main` to go green.
   NEVER weaken an assertion to make a test pass.
-- No random data on the assertion path. Time uses a fixed `Clock`; money uses the `vnd()` helper.
+- No random data on the assertion path (faker, UUID, `Instant.now()`). Time uses a fixed `Clock`;
+  money/currency (if this product has one) uses a single fixed helper — never random amounts.
 - Fixture names come from `docs/FIXTURE_BACKLOG.md` — never invent new names when the backlog has one.
 
 ## Pipeline & role separation
 - Pipeline: scan (scripts) → `/investigate-flow` → `/write-scenarios` → `/fixture-backlog`
-  → `/build-fixtures` → `/generate-it`.
-- Subagents: `scanner` (writes only docs/scan/ + FLOW_BACKLOG), `investigator` (read-only src, writes docs/flows/),
-  `test-writer` (writes only src/test; src/main is off-limits).
+  → `/build-fixtures` → `/generate-it` → `/onboarding-doc` (rollup when a flow flips ✅ + monthly).
+- Subagents: `scanner` (writes only docs/scan/ + FLOW_BACKLOG + ONBOARDING), `investigator` (read-only src,
+  writes docs/flows/ + GLOSSARY), `test-writer` (writes only src/test + doc statuses; src/main is off-limits).
+- `ONBOARDING.md` is DERIVED from docs/ only — regenerate via `/onboarding-doc`; hand-editing it is review-blocking.
 - Domain knowledge lives in `docs/` — do NOT add domain knowledge to this file. Keep it under 50 lines.

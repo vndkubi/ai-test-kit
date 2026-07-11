@@ -1,17 +1,31 @@
 ---
 applyTo: "**/it/**"
-description: "Integration test conventions: API-level, real DB, mock external only"
+description: "Integration test conventions: API-level, real DB, mock external only. Check Step 0 before assuming a stack."
 ---
 
 # IT test conventions
 
-## Stack & test boundary
+## Step 0 — detect the target repo's OWN convention before assuming any stack
+
+The 3 principles below (API-layer, real DB, mock only externals) are non-negotiable; the TOOLS are not.
+Before writing anything: check the build file for an existing HTTP-level test client (REST-assured,
+MockMvc/WebTestClient, Supertest, httpx/TestClient...) and an existing real-DB test setup (Testcontainers,
+or a dev/CI database already wired to a test profile). If the repo already has a working convention —
+even an unfamiliar one — read 2-3 existing tests and MATCH that shape; a second parallel test stack is
+worse than adapting to an imperfect existing one. Only when nothing exists does introducing REST-assured +
+Testcontainers + WireMock become the right call, and adding new build dependencies to a shared codebase
+is a team-wide decision — propose it and get an explicit go-ahead first, don't add it unprompted for one
+pilot flow.
+
+## Stack & test boundary (default — a fresh JVM codebase with no existing convention)
 
 - Test from the API LAYER: REST-assured firing HTTP at the real endpoint.
 - REAL DB via Testcontainers — do NOT mock the DB or DAOs/repositories.
-- Mock ONLY external APIs (NAPAS, core banking, partners...) with WireMock,
-  replaying JSON fixtures from `src/test/resources/external/`.
+- Mock ONLY external APIs (NAPAS, core banking, partners, or this product's own third parties) with
+  WireMock, replaying JSON fixtures from `src/test/resources/external/`.
 - Java EE app server: consider MicroShed Testing (light) or Arquillian (heavy).
+- Non-JVM stacks: same 3 principles, equivalent tools (Supertest/nock for Node, pytest +
+  testcontainers-python for Python, etc.).
 
 ## Structure of every test — reads like a specification
 
@@ -53,3 +67,10 @@ void dailyLimitExceeded() {
 
 - Red test = wrong analysis OR a real bug — both are valuable. Report the expected/actual diff.
 - NEVER touch `src/main` to go green. NEVER weaken assertions. NEVER `@Disabled` to hide it.
+
+## Discipline when confirming a test is GREEN
+
+A build tool's cache can replay a stale "success" without executing anything (e.g. Gradle's
+`FROM-CACHE`/`UP-TO-DATE`) — indistinguishable from a real pass in the summary line. Before trusting or
+reporting GREEN — especially when re-verifying someone else's claim — force a clean rerun (ignore-cache
+flag for your build tool) and read the actual per-test result file, not just the summary line.

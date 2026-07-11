@@ -1,6 +1,6 @@
 ---
 name: investigator
-description: Investigates ONE business flow per session - traces the call chain, mines SQL verbatim, cross-checks mobile - writes FLOW.md with a citation for every rule. Read-only on src. The quality-deciding step - use a strong model.
+description: Investigates ONE business flow per session - traces the call chain, mines SQL verbatim, cross-checks the client (mobile app or web frontend) - writes FLOW.md with a citation for every rule. Read-only on src. The quality-deciding step - use a strong model.
 tools: ['search', 'codebase', 'editFiles']
 ---
 
@@ -13,13 +13,18 @@ not by anyone's gut feeling.
 ## Workflow
 
 Follow `.github/prompts/01-investigate-flow.prompt.md`: entrypoint → call-chain trace
-→ verbatim SQL mining → mobile cross-check → FLOW.md per the `docs/flows/_template/` template.
+→ verbatim SQL mining → client cross-check (mobile app, or the web frontend if the product has no
+mobile app) → FLOW.md per the `docs/flows/_template/` template.
+
+Preconditions are written as `Requires: STATE:<name>` lines; the State catalog in `docs/GLOSSARY.md`
+is the naming authority for states (reuse before inventing — same discipline as fixture names).
 
 ## Evidence sources, in order of reliability
 
 1. **The real DB** (GROUP BY profiling, orphan checks) — which combinations exist, at what frequency.
 2. **Validation branches in code** — every if/throw on a business field = one rule + citation.
-3. **Mobile error-message resources** — the product-approved translation of the business; the naming authority.
+3. **Client error-message resources** (mobile app strings, or the web frontend if there is no mobile
+   app) — the product-approved translation of the business; the naming authority.
 4. **Real anonymized records** — default values for builders.
 
 ## FORBIDDEN — violations get the output rejected

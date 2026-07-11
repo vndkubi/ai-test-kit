@@ -6,11 +6,17 @@
 
 ## Actors
 
-<!-- Who/what participates: customer, mobile app, NAPAS, core banking... -->
+<!-- Who/what participates: customer, mobile app or web frontend, and this product's own externals
+     (e.g. NAPAS/core banking for a fintech product, a payment gateway, an LLM API, a CMS...). -->
 
 ## Preconditions
 
-<!-- State that must exist before the flow runs. Each precondition cites where the code checks it. -->
+<!-- State that must exist before the flow runs. Each precondition cites where the code checks it.
+     Machine-readable line (feeds the ONBOARDING dependency ladder):
+       - Requires: STATE:<name> — enforced at <file:line>
+     State names: reuse from the State catalog in GLOSSARY.md; a new state gets registered there first.
+     ⚠ Auth/step-up checks usually live in cross-cutting code (security filter chain, interceptor,
+     @PreAuthorize, AOP) — check there before concluding "no preconditions". -->
 
 ## Steps (call chain)
 
@@ -48,12 +54,13 @@
 | External | When called | Request/Response fixture | Timeout/error handling | Citation |
 |---|---|---|---|---|
 
-## Mobile cross-check
+## Client cross-check (mobile app, or the web frontend if the product has no mobile app)
 
-<!-- The server tells you WHAT the rule is; mobile tells you WHAT THE RULE IS CALLED in user language.
-     Both agree = high confidence. They disagree = an expensive open question (often a real bug). -->
+<!-- The server tells you WHAT the rule is; the client tells you WHAT THE RULE IS CALLED in user
+     language. Both agree = high confidence. They disagree = an expensive open question (often a
+     real bug). -->
 
-| Server rule | Does mobile validate before calling? | Error code → mobile message | Match? |
+| Server rule | Does the client validate before calling? | Error code → client message | Match? |
 |---|---|---|---|
 
 ## Open questions

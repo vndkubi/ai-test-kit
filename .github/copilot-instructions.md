@@ -24,3 +24,5 @@
 ## Where knowledge lives
 - Domain knowledge lives in `docs/` (FLOW.md, GLOSSARY.md, backlogs) — do NOT add domain knowledge to this file.
   This file holds only always-true guardrails; keep it under 50 lines.
+- `ONBOARDING.md` is DERIVED from docs/ only (prompt 06 rollup) — regenerate it; never hand-edit,
+  fix the source doc instead.

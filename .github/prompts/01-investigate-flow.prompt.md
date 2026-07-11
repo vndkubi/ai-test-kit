@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: investigator
 description: "Investigate ONE business flow → docs/flows/<flow>/FLOW.md (the quality-deciding step)"
 ---
 
@@ -18,6 +18,11 @@ description: "Investigate ONE business flow → docs/flows/<flow>/FLOW.md (the q
 1. **Locate the entrypoint** (REST endpoint / JMS listener / scheduler) of this flow. ONE flow only.
    Record `Class.java:line`.
 
+1b. **Preconditions**: check the cross-cutting enforcement for this entrypoint (security filter chain,
+   interceptors, `@PreAuthorize`, AOP) — tracing from the controller alone will MISS these.
+   Write each as `- Requires: STATE:<name> — enforced at file:line`. State names come from the
+   State catalog in `docs/GLOSSARY.md`: reuse before inventing; register new states there.
+
 2. **Trace the call chain** from the entrypoint. At every step record:
    - Side effects: which DB tables are written/read, which external APIs are called, which events are fired.
    - EVERY validation/exception branch: its condition + the error code returned (each branch = one candidate business rule).
@@ -28,13 +33,15 @@ description: "Investigate ONE business flow → docs/flows/<flow>/FLOW.md (the q
    - SELECTed tables → "Given — data to seed". INSERT/UPDATE/DELETE tables → "Then — assertions".
    - Dynamically-built SQL → tag `[DYNAMIC-SQL]`, list the concatenation branches, do NOT guess the final SQL.
 
-3. **Cross-check the mobile side** (the second witness):
-   - What does mobile validate BEFORE calling this endpoint? (rules duplicated on both sides = important rules)
-   - Which error code maps to which message? (take the CANONICAL BUSINESS NAMES from here — string resources)
-   - Server and mobile disagree → an expensive open question, often a real bug.
+3. **Cross-check the client side** (the second witness) — the mobile app if one exists, otherwise the
+   web frontend (it plays the same role when there's no mobile app):
+   - What does the client validate BEFORE calling this endpoint? (rules duplicated on both sides = important rules)
+   - Which error code maps to which message? (take the CANONICAL BUSINESS NAMES from here — string
+     resources / i18n files / component copy)
+   - Server and client disagree → an expensive open question, often a real bug.
 
 4. **Write the output** per template: Actors / Preconditions / Steps / Data contract / Business rules /
-   External calls / Mobile cross-check / Open questions.
+   External calls / Client cross-check / Open questions.
 
 ## Guardrails — violations mean redo
 

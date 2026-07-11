@@ -5,9 +5,9 @@ It walks one flow through the whole pipeline, then shows how to scale.
 Commands are given for both Claude Code (`/command`) and Copilot (prompt files); they are equivalent.
 
 ```
-Step 0        Step 1           Step 2..6 (repeat per flow)
-scan  ───►  FLOW_BACKLOG ───►  investigate → scenarios → fixture-backlog → build-fixtures → generate-it
-(scripts)   (scanner agent)    (investigator)  (main)       (main)          (test-writer)    (test-writer)
+Step 0        Step 1           Step 2..6 (repeat per flow)                                      Step 7 (on ✅ / monthly)
+scan  ───►  FLOW_BACKLOG ───►  investigate → scenarios → fixture-backlog → build-fixtures → generate-it → onboarding-doc
+(scripts)   (scanner agent)    (investigator)  (main)       (main)          (test-writer)    (test-writer)   (scanner, docs-only)
 ```
 
 ---
@@ -118,13 +118,24 @@ Claude Code:  /generate-it create-note
 Copilot:      prompt 05-generate-it
 ```
 
-Stack: REST-assured at the API layer + Testcontainers (real DB) + WireMock (externals ONLY —
-on doughnut that's the OpenAI API; on a fintech product, NAPAS/core banking).
+Default stack (fresh JVM codebase, nothing established yet): REST-assured at the API layer +
+Testcontainers (real DB) + WireMock (externals ONLY — on doughnut that's the OpenAI API; on a
+fintech product, NAPAS/core banking). **But check first** — the it-test-conventions skill's Step 0
+says to look for an existing API-layer + real-DB test convention before assuming this stack.
+On the doughnut pilot, the target repo had ZERO of REST-assured/Testcontainers/WireMock as
+dependencies; it already had its own convention (`@SpringBootTest` + `MockMvc` + a real dev/CI MySQL
++ `@Transactional` rollback) satisfying the same 3 principles (API-layer, real DB, mock external only)
+with different tools. The right call was to match that, not bolt on a second stack — introducing new
+build dependencies into a shared, mature codebase is a team-wide decision, not a pilot-flow one; ask
+first.
 
 Then the moment the whole pipeline exists for:
 
-- **GREEN** → the analysis is machine-verified. SCENARIOS.md is now official, trusted
-  documentation. Update FLOW_BACKLOG status to ✅.
+- **GREEN** → before trusting it, force a cache-free rerun and read the actual per-test result file —
+  a build cache can replay a stale success that looks identical to a real pass in the summary line
+  (this bit a verification pass on the doughnut pilot: a naive rerun returned Gradle's `FROM-CACHE`
+  and would have looked green without executing anything). Once genuinely confirmed: the analysis is
+  machine-verified, SCENARIOS.md is now official, trusted documentation. Update FLOW_BACKLOG status to ✅.
 - **RED** → read the expected/actual diff against `FLOW.md#rule-N`. Two cases, both wins:
   the AI misread the code → fix FLOW.md (back to Step 2), or the code really does that → a bug
   found before any refactor. **Never** let anyone make it green by touching `src/main`,
@@ -133,15 +144,41 @@ Then the moment the whole pipeline exists for:
 Tests tagged `@Tag("assumption")` (rules awaiting the BA) run in a separate CI job that never
 blocks the build. When the BA answers: rename fixtures (pass 2), untag, update GLOSSARY.md.
 
+## Step 7 — Regenerate the onboarding rollup (scanner agent, minutes)
+
+```
+Claude Code:  /onboarding-doc
+Copilot:      run prompt 06-onboarding-doc
+```
+
+`ONBOARDING.md` (next to FLOW_BACKLOG.md) is the top-down entry point a new dev reads in 10 minutes
+before anything else. It is **derived**: the generator reads docs/ ONLY — never src/ — and joins
+FLOW_BACKLOG (map + statuses), the `Requires: STATE:` preconditions across FLOW.md files (the
+dependency ladder), the GLOSSARY State catalog, and HEATMAP centrality. Structure and links only;
+a claim that traces to no docs/ file must not survive review.
+
+Generation runs bottom-up (evidence first), reading runs top-down (big picture first) — never
+generate in the reading direction ("read the whole codebase, write the docs" = uncited speculation).
+
+Regenerate when a flow flips ✅ (step 6 reminds you) and inside the monthly scan session.
+Review is mechanical: spot-check that every statement links back to a docs/ file.
+Flows investigated before the `Requires: STATE:` convention simply appear without dependency edges,
+counted under "preconditions not yet declared" — declare states lazily when each flow is next touched.
+
+**The onboarding loop this enables:** day 1 — ONBOARDING.md + skim GLOSSARY; day 2–3 — one ✅ flow:
+read SCENARIOS.md, run its IT tests green locally, step through with a debugger; week 2 — the new dev
+takes one ⬜ flow through steps 2→6 themselves. The guardrails make this safe (investigator is
+read-only on src, test-writer can't touch src/main) — onboarding by contributing, not by reading.
+
 ---
 
 ## After the pilot — the operating loop
 
 | Cadence | Action |
 |---|---|
-| per flow (1–2 days) | Steps 2→6. Flow N+1 is cheaper: check FIXTURE_BACKLOG first — needed fixtures are often already `built` |
+| per flow (1–2 days) | Steps 2→6. Flow N+1 is cheaper: check FIXTURE_BACKLOG first — needed fixtures are often already `built`. Flow flips ✅ → `/onboarding-doc` (minutes) |
 | weekly | 15-minute review: FLOW_BACKLOG statuses, QUESTIONS.md answered vs pending, glossary growth |
-| monthly | re-run `run_all.sh` in CI, diff `docs/scan/` — new endpoints/entities/enums surface as backlog items automatically |
+| monthly | re-run `run_all.sh` in CI, diff `docs/scan/` — new endpoints/entities/enums surface as backlog items automatically; regenerate `ONBOARDING.md` in the same session |
 | always | one flow per session; parallel work is safe because FIXTURE_BACKLOG is the naming coordination point |
 
 Success metric: **number of flows with doc + green tests** — not coverage %.
@@ -156,6 +193,7 @@ Success metric: **number of flows with doc + green tests** — not coverage %.
 | Test made green by editing src/main or softening asserts | test-writer role forbids it — treat as review-blocking |
 | Fixture names invented ad hoc | names come from FIXTURE_BACKLOG only |
 | Instructions file growing with domain knowledge | domain knowledge goes to docs/; instructions stay <50 lines |
+| ONBOARDING.md hand-edited, or contains a claim with no docs/ source | derived-doc rule — fix the source doc and regenerate via `/onboarding-doc`; treat as review-blocking |
 | Scan regex missing your codebase's patterns | scripts are code — extend them (Spring MVC support and the SIGPIPE fix both came from a real pilot) |
 
 ## Known approximations (fine to live with)

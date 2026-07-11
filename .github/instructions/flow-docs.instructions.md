@@ -13,6 +13,10 @@ description: "Conventions for flow documentation (FLOW.md, SCENARIOS.md, QUESTIO
   (to assert). SQL verbatim; dynamic SQL tagged `[DYNAMIC-SQL]` + branches listed.
 - SCENARIOS.md: each scenario maps to exactly ONE rule of FLOW.md, with `Source: FLOW.md#rule-N (file:line)`.
   Rules without a scenario must appear in the Coverage table at the end of the file — never silently skipped.
-- Situation names come from mobile error messages when available (that's the product-approved
-  translation of the business into user language).
+- Situation names come from the client's error messages when available — the mobile app if one
+  exists, otherwise the web frontend (that's the product-approved translation of the business into
+  user language).
+- FLOW.md Preconditions use machine-readable lines `- Requires: STATE:<name> — enforced at file:line`;
+  state names come from the State catalog in `docs/GLOSSARY.md` (register new states there).
+  Auth checks usually live in filter chains/interceptors, not controllers — look there first.
 - Flow status changes propagate back to `docs/FLOW_BACKLOG.md`.

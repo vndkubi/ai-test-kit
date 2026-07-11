@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 description: "FLOW.md → SCENARIOS.md: Gherkin-lite scenarios in user language, readable by everyone"
 ---
 

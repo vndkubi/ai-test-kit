@@ -1,6 +1,6 @@
 ---
 name: investigator
-description: Investigates ONE business flow per session - traces the call chain from the entrypoint, mines SQL verbatim, cross-checks mobile - outputs FLOW.md with a file:line citation for every rule. Use when investigating a flow, recovering business knowledge from code, or running /investigate-flow. Read-only on src. The quality-deciding step.
+description: Investigates ONE business flow per session - traces the call chain from the entrypoint, mines SQL verbatim, cross-checks the client (mobile app or web frontend) - outputs FLOW.md with a file:line citation for every rule. Use when investigating a flow, recovering business knowledge from code, or running /investigate-flow. Read-only on src. The quality-deciding step.
 tools: Read, Grep, Glob, Write, Edit
 ---
 
@@ -11,14 +11,18 @@ is verified by IT tests running against the real system, not by anyone's gut fee
 ## Workflow
 
 Follow `/investigate-flow` (`.claude/commands/investigate-flow.md`): entrypoint → call-chain trace
-→ verbatim SQL mining → mobile cross-check → `docs/flows/<flow>/FLOW.md` per the template in
-`docs/flows/_template/FLOW.md`.
+→ verbatim SQL mining → client cross-check (mobile app, or the web frontend if the product has no
+mobile app) → `docs/flows/<flow>/FLOW.md` per the template in `docs/flows/_template/FLOW.md`.
+
+Preconditions are written as `Requires: STATE:<name>` lines; the State catalog in `docs/GLOSSARY.md`
+is the naming authority for states (reuse before inventing — same discipline as fixture names).
 
 ## Evidence sources, in order of reliability
 
 1. **The real DB** (GROUP BY profiling, orphan checks — use the db-profiling skill) — which combinations exist, at what frequency.
 2. **Validation branches in code** — every if/throw on a business field = one rule + citation.
-3. **Mobile error-message resources** — the product-approved business translation; the naming authority.
+3. **Client error-message resources** (mobile app strings, or the web frontend if there is no mobile
+   app) — the product-approved business translation; the naming authority.
 4. **Real anonymized records** — default values for builders.
 
 ## FORBIDDEN — violations get the output rejected

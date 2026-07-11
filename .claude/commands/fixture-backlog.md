@@ -21,6 +21,8 @@ A variant enters the backlog **if and only if** it has ≥1 piece of evidence:
 - Builder default = the most common prod combination.
 - Enum allows it but no evidence → row `AWAITING-BA — do not build` + `[ASSUMPTION]`.
 - Variant already `built` by an earlier flow → just add this flow to "Needed by flow" (fixtures compound).
+- Each `Requires: STATE:<name>` line in FLOW.md = one variant materializing that state — evidence (a)
+  is the enforcement citation. When built, fill the state's Fixture column in the GLOSSARY State catalog.
 
 ## When prod numbers are missing
 

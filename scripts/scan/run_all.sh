@@ -21,7 +21,7 @@ mkdir -p "$OUT_DIR"
 
 echo "=== Phase 0: mechanical scan (NO AI involved) ==="
 bash "$HERE/01_entrypoints.sh" "$SRC"
-bash "$HERE/02_churn.sh" || echo "WARN: churn needs a git repo — skipped"
+bash "$HERE/02_churn.sh" "$SRC/**/*.java" || echo "WARN: churn needs a git repo — skipped"
 rm -f "$OUT_DIR/deps.txt"
 for classes in "$@"; do
   bash "$HERE/03_deps.sh" "$classes" "$PKG"
@@ -38,5 +38,5 @@ echo
 echo "=== DONE — output in $OUT_DIR/ ==="
 echo "Next steps (AI joins the pipeline from here):"
 echo "  1. Give HEATMAP.md + ENTRYPOINTS.md to the 'scanner' agent to group & name flows in plain language"
-echo "  2. Fill docs/FLOW_BACKLOG.md by priority: money-touching(x3) > churn > incidents > core entities"
+echo "  2. Fill docs/FLOW_BACKLOG.md by priority: business-critical(x3, if applicable) > churn > incidents > core entities"
 echo "  3. Run prompt 01-investigate-flow for the first flow"

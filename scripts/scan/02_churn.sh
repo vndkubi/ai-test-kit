@@ -17,7 +17,7 @@ OUT="$OUT_DIR/CHURN.md"
 {
   echo "# CHURN — top $TOP most-changed files (since: $SINCE, generated $(date +%F))"
   echo
-  echo "> High churn + money-touching = highest priority in FLOW_BACKLOG.md"
+  echo "> High churn + business-critical (money/compliance/safety, if applicable) = highest priority in FLOW_BACKLOG.md"
   echo
   echo "| Commits | File |"
   echo "|---|---|"

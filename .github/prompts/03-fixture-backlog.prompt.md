@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 description: "Derive the fixture variants a flow needs → update docs/FIXTURE_BACKLOG.md"
 ---
 
@@ -26,6 +26,8 @@ Plus 3 decisions:
 2. Enum allows it but NO evidence → row `AWAITING-BA — do not build`, tagged `[ASSUMPTION]`.
 3. Variant already `built` by an earlier flow → just add this flow to its "Needed by flow" column;
    never create a duplicate row (fixtures compound — flow N+1 is cheaper than flow N).
+4. Each `Requires: STATE:<name>` line in FLOW.md = one variant materializing that state — evidence (a)
+   is the enforcement citation. When built, fill the state's Fixture column in the GLOSSARY State catalog.
 
 ## When prod numbers are missing
 
